@@ -32,7 +32,7 @@ print("processing text")
 
 paragraphs = text.split("\n\n")
 for i in tqdm(range(len(paragraphs))):
-    engine.save_to_file(paragraphs[i], "tmp/" + str(i) + ".mp3")
+    engine.save_to_file(paragraphs[i], "tmp/" + str(i) + ".wav")
     engine.runAndWait()
 
 print("combining files")
@@ -40,14 +40,24 @@ print("combining files")
 result = None
 paths = os.listdir('tmp')
 for i in tqdm(range(len(paragraphs))):
-    sound = AudioSegment.from_file("tmp/" + paths[i])
-    if result == None:
-        result = sound
-    else:
-        result = result.append(sound)
+    try:
+        sound = AudioSegment.from_file("tmp/" + paths[i])
+        if len(sound) > 0.1:
+            if result == None:
+                result = sound
+            else:
+                result = result.append(sound)
+    except:
+        pass
+
+if result == None:
+    raise Exception("Something wen't wrong!")
 
 result.export("result.mp3", format="mp3")
 
-shutil.rmtree('tmp')
+try:
+    shutil.rmtree('tmp')
+except:
+    pass
 
 input("Done! Press enter to exit")
